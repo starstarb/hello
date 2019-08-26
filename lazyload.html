@@ -26,54 +26,56 @@
 <body>
   <div class="wrapper">
     <ul id="ul">
-      <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	    <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	    <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	    <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	    <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-	    <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
-          <li><img class="img" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" ></li>
+      <li><img src="1.png" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" alt="" ></li>
+      <li><img src="1.png" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" alt=""></li>
+      <li><img src="1.png" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" alt=""></li>
+      <li><img src="1.png" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" alt=""></li>
+      <li><img src="1.png" data-src="http://www.fastcache.com.cn/images/image/product_Faststatic.gif" alt=""></li>
+         
     </ul>
   </div>
   <script>
-  function getOffsetByBody(el) {
-	let offsetTop = 0
-	while(el && el.tagName !== 'BODY') {
-		offsetTop += el.offsetTop
-		el = el.offsetParent
-	}
-	return offsetTop
-}
-function lazyload() {
-      let img = document.getElementsByClassName('img')
-      let availHeight = window.screen.availHeight // 浏览器可用部分高度
-      let scrollTop = document.body.scrollTop || document.documentElement.scrollTop // 滚动隐藏的高度
-      for(let i = 0; i < img.length; i++) {
-      	 let offsetTop = getOffsetByBody(img[i])
-        if(offsetTop - scrollTop < availHeight) {  // 判断条件，元素是否出现在用户视野内
-          let src = img[i].getAttribute('data-src') // 获取真实地址
-          if(src) { // 如果获取到了 data-src 说明图片是第一次出现在视野内
-            img[i].setAttribute('src', src) // 将真实地址赋给图片的src属性
-            img[i].removeAttribute('data-src') // 移除data-src
-          }
-        }
-      }
+window.onload = function(){
+    var scrollTop = window.scrollY;
+    var imgs = Array.from(document.querySelectorAll('img'));
+    lazyLoad();
+    // 采用了节流函数
+    window.addEventListener('scroll',throttle(lazyLoad,500,1000));
+    function throttle(fun, delay, time) {
+        var timeout,startTime = new Date();
+        return function() {
+            var context = this,
+                args = arguments,
+                curTime = new Date();
+            clearTimeout(timeout);
+            // 如果达到了规定的触发时间间隔，触发 handler
+            console.log(curTime - startTime)
+            if (curTime - startTime >= time) {
+                fun();
+                startTime = curTime;
+                // 没达到触发间隔，重新设定定时器
+            } else {
+                timeout = setTimeout(fun, delay);
+            }
+        };
+    };
+    // 实际想绑定在 scroll 事件上的 handler
+    // 需要访问到imgs ,  scroll 
+    function lazyLoad(){
+        scrollTop = window.scrollY;
+        imgs.forEach((item,index)=>{
+            if( scrollTop===0 && item.dataset.src !== '' && item.offsetTop < window.innerHeight + scrollTop ){
+                // alert()
+                item.setAttribute('src',item.dataset.src)
+                item.setAttribute('data-src','')
+            }else if( item.dataset.src !== '' && item.offsetTop < window.innerHeight + scrollTop && item.offsetTop > scrollTop ){
+                item.setAttribute('src',item.dataset.src)
+                item.setAttribute('data-src','')
+            }
+        })
     }
-    window.onload = lazyload // 页面加载执行 lazyload
-    window.onscroll = lazyload // 监听滚动事件，滚动时执行lazyload
+
+}
 
   </script>
 </body>
